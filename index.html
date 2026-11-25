@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101827"><title>AI Stock Intelligence V1</title>
+<link rel="manifest" href="manifest.json">
+<style>
+:root{--bg:#0b1220;--panel:#141f31;--muted:#9aa9bd;--text:#edf3fb;--line:#29374c;--green:#25c58a;--red:#ff647c;--amber:#f3bd59}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px system-ui,-apple-system,Segoe UI,sans-serif}
+header{padding:22px 18px 16px;background:#101827;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:2}
+h1{font-size:21px;margin:0 0 5px}small,.muted{color:var(--muted)}main{max-width:760px;margin:auto;padding:15px}
+nav{display:flex;gap:8px;overflow:auto;margin:0 0 14px}nav button{white-space:nowrap}
+button,.btn{background:#23334b;color:var(--text);border:1px solid #3a4c65;border-radius:11px;padding:11px 14px;font-weight:650;cursor:pointer}
+button.primary{background:#176e57;border-color:#218e70}button.active{outline:2px solid var(--green)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:15px;margin:12px 0}
+.row{display:flex;justify-content:space-between;gap:12px;align-items:center}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.metric{background:#0f1928;border-radius:12px;padding:12px}.metric b{font-size:20px;display:block;margin-top:4px}
+label{display:block;color:var(--muted);font-size:13px;margin:10px 0 5px}input,select{width:100%;padding:12px;border-radius:10px;border:1px solid #394a61;background:#0d1725;color:var(--text);font:inherit}
+h2{font-size:17px;margin:0 0 10px}.pill{border-radius:99px;padding:5px 10px;font-size:12px;font-weight:750;background:#26354b}.green{color:var(--green)}.red{color:var(--red)}.amber{color:var(--amber)}
+.hidden{display:none}.signal{font-size:23px;font-weight:800;margin:8px 0}.bar{height:9px;background:#26354b;border-radius:9px;overflow:hidden}.bar span{height:100%;display:block;background:var(--green)}
+footer{padding:18px;color:var(--muted);font-size:12px;line-height:1.5}.hint{font-size:12px;color:var(--muted);line-height:1.5}
+@media(min-width:600px){main{padding:22px}.grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+</style></head>
+<body>
+<header><div class="row"><div><h1>AI Stock Intelligence</h1><small>Version 1.0 · Groww workflow · Android-first</small></div><span class="pill">DEMO</span></div></header>
+<main>
+<nav><button class="active" onclick="tab('dash',this)">Dashboard</button><button onclick="tab('scan',this)">Signal scanner</button><button onclick="tab('alerts',this)">Alerts setup</button><button onclick="tab('guide',this)">Setup guide</button></nav>
+<section id="dash">
+<div class="card"><div class="row"><h2>Market watch</h2><span class="pill amber">Manual/demo data</span></div>
+<div class="grid"><div class="metric"><small>NIFTY 50</small><b>—</b><small>Connect data in next phase</small></div><div class="metric"><small>BANK NIFTY</small><b>—</b><small>Connect data in next phase</small></div><div class="metric"><small>Watchlist</small><b>0</b><small>Stocks tracked</small></div><div class="metric"><small>Capital</small><b>₹20,000</b><small>Risk-controlled mode</small></div></div></div>
+<div class="card"><h2>Today's discipline</h2><div class="grid"><div class="metric"><small>Risk per trade</small><b>₹100–₹200</b></div><div class="metric"><small>Daily loss cap</small><b>₹400</b></div></div><p class="hint">These are conservative planning limits, not a guarantee. Skip any trade whose realistic stop-loss risk exceeds your limit.</p></div>
+<div class="card"><h2>System status</h2><p><span class="pill amber">No live market feed</span></p><p class="hint">This first prototype calculates a transparent indicator score from values you enter. It does not display invented live prices or place orders.</p></div>
+</section>
+<section id="scan" class="hidden">
+<div class="card"><h2>Manual signal scanner</h2><p class="hint">Enter values from a trusted chart/data source. Use completed candles, not guesses.</p>
+<label>Instrument</label><select id="instrument"><option>NIFTY 50</option><option>BANK NIFTY</option><option>Stock (cash)</option></select>
+<label>Last traded price (₹)</label><input id="price" type="number" placeholder="e.g. 24500">
+<label>EMA 9</label><input id="ema9" type="number" placeholder="EMA 9">
+<label>EMA 21</label><input id="ema21" type="number" placeholder="EMA 21">
+<label>VWAP</label><input id="vwap" type="number" placeholder="VWAP">
+<label>RSI (0–100)</label><input id="rsi" type="number" min="0" max="100" placeholder="e.g. 58">
+<label>MACD condition</label><select id="macd"><option value="1">Bullish crossover / above signal</option><option value="0">Neutral / unclear</option><option value="-1">Bearish crossover / below signal</option></select>
+<label>Volume vs 20-period average</label><select id="volume"><option value="1">Above average</option><option value="0">Average / unclear</option><option value="-1">Below average</option></select>
+<label>Options OI confirmation (for indices only)</label><select id="oi"><option value="1">Supports bullish direction</option><option value="0">Mixed / unavailable</option><option value="-1">Supports bearish direction</option></select>
+<button class="primary" style="width:100%;margin-top:14px" onclick="analyse()">Analyse setup</button>
+<div id="result" class="card hidden" style="margin-top:15px"><small>AI RULE-BASED RESULT</small><div id="signal" class="signal">—</div><div class="row"><span>Directional score</span><b id="score">0/80</b></div><div class="bar"><span id="bar" style="width:0%"></span></div><p id="reason" class="hint"></p><p class="hint" id="risk"></p></div>
+</div>
+</section>
+<section id="alerts" class="hidden">
+<div class="card"><h2>Android notifications</h2><p class="hint">Browser notifications work when this app is hosted over HTTPS and permission is granted. Android may restrict background delivery; do not rely on them as the only alert channel.</p><button class="primary" onclick="notifyPermission()">Enable notifications</button><p id="notifyStatus" class="hint"></p></div>
+<div class="card"><h2>Telegram alerts</h2><p class="hint">A Telegram bot needs a small secure backend. Never paste your bot token into this app or share it with anyone.</p><ol class="hint"><li>In Telegram, open <b>@BotFather</b>, send <code>/newbot</code> and follow its steps.</li><li>Save the bot token privately.</li><li>Open your new bot and press Start. Send it a test message.</li><li>In the next version, connect the token on a private backend and send alerts through Telegram's Bot API.</li></ol><span class="pill amber">Telegram backend not connected in this demo</span></div>
+</section>
+<section id="guide" class="hidden">
+<div class="card"><h2>Install on Android</h2><ol class="hint"><li>Upload the supplied files to a trusted HTTPS static host (for example, your own GitHub Pages project or another static host).</li><li>Open the hosted website in Chrome on Android.</li><li>Tap Chrome menu ⋮ → <b>Install app</b> or <b>Add to Home screen</b>.</li><li>Open it from your home screen.</li></ol></div>
+<div class="card"><h2>Groww connection – next phase</h2><p class="hint">Use only Groww's official API documentation and approved access. API availability, subscriptions, rate limits and market-data permissions must be verified in your Groww account. API credentials belong on a secure backend, never in browser code.</p><p><a style="color:#8fc8ff" href="https://groww.in/trade-api" target="_blank" rel="noopener">Groww Trade API documentation ↗</a></p></div>
+<div class="card"><h2>Version 1.0 limitations</h2><ul class="hint"><li>No live prices, FII/DII feed, news feed or historical backtest yet.</li><li>Signals are rule-based demonstrations, not personalized investment advice.</li><li>No broker login, order placement or automatic execution.</li><li>Do not trade from a demo signal.</li></ul></div>
+</section>
+</main>
+<footer>Educational prototype. Market data is not connected. Options trading can cause rapid losses, including loss of the entire premium. Verify every value independently and paper-trade before risking capital.</footer>
+<script>
+function tab(id,btn){['dash','scan','alerts','guide'].forEach(x=>document.getElementById(x).classList.toggle('hidden',x!==id));document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));btn.classList.add('active')}
+function val(id){return Number(document.getElementById(id).value)}
+function analyse(){
+ let p=val('price'),e9=val('ema9'),e21=val('ema21'),v=val('vwap'),r=val('rsi');
+ if(!p||!e9||!e21||!v||!document.getElementById('rsi').value||r<0||r>100){alert('Please enter valid price, EMA 9, EMA 21, VWAP and RSI values.');return}
+ let score=0,why=[];
+ if(e9>e21){score+=20;why.push('EMA 9 above EMA 21 (+20)')}else if(e9<e21){score-=20;why.push('EMA 9 below EMA 21 (-20)')}
+ if(p>v){score+=20;why.push('Price above VWAP (+20)')}else if(p<v){score-=20;why.push('Price below VWAP (-20)')}
+ if(r>=55&&r<=70){score+=10;why.push('RSI supports bullish momentum (+10)')}else if(r<=45&&r>=30){score-=10;why.push('RSI supports bearish momentum (-10)')}else why.push('RSI neutral / stretched (0)')
+ let m=Number(document.getElementById('macd').value),vol=Number(document.getElementById('volume').value),oi=Number(document.getElementById('oi').value);
+ score+=m*10;score+=vol*10;score+=oi*10;
+ why.push('MACD '+(m>0?'bullish':m<0?'bearish':'neutral'));why.push('Volume '+(vol>0?'above average':vol<0?'below average':'unclear'));why.push('OI '+(oi>0?'bullish confirmation':oi<0?'bearish confirmation':'mixed/unavailable'));
+ let label=score>=40?'BULLISH WATCH':score<=-40?'BEARISH WATCH':'NO TRADE / WAIT';
+ let cls=score>=40?'green':score<=-40?'red':'amber';
+ document.getElementById('result').classList.remove('hidden');document.getElementById('signal').textContent=label;document.getElementById('signal').className='signal '+cls;
+ document.getElementById('score').textContent=(score>0?'+':'')+score+'/80 directional points';document.getElementById('bar').style.width=Math.min(100,Math.abs(score)/80*100)+'%';document.getElementById('reason').textContent=why.join(' · ');
+ document.getElementById('risk').textContent='This is a directional checklist, not an entry signal. Wait for a completed-candle breakout/retest and calculate quantity so total stop-loss risk stays within ₹100–₹200. If uncertain, do not trade.';
+}
+async function notifyPermission(){if(!('Notification'in window)){document.getElementById('notifyStatus').textContent='Notifications are not supported by this browser.';return}let p=await Notification.requestPermission();document.getElementById('notifyStatus').textContent='Notification permission: '+p;if(p==='granted')new Notification('AI Stock Intelligence',{body:'Android notifications are enabled for this prototype.'})}
+if('serviceWorker'in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
+</script></body></html>
